@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currency Converter</title>
+  <link rel="stylesheet" href="Test7.css">
+</head>
+<body>
+<div class="container">
+  <h1>Currency Converter</h1>
+  <div class="input-container">
+    <label for="amount">Amount: </label>
+    <input type="number" id="amount" step="0.01">
+  </div>
+  <div class="input-container">
+    <label for="fromCurrency">From: </label>
+    <select id="fromCurrency">
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="KZT">KZT</option>
+    </select>
+  </div>
+  <button id="convertBtn">Convert</button>
+  <div class="result-container">
+    <div id="result" class="result"></div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const convertButton = document.getElementById('convertBtn');
+    const resultDiv = document.getElementById('result'); // Элемент для вывода результата
+
+    convertButton.addEventListener('click', function () {
+      const amount = parseFloat(document.getElementById('amount').value);
+      const fromCurrency = document.getElementById('fromCurrency').value;
+
+      if (isNaN(amount)) {
+        resultDiv.textContent = 'Please enter a valid amount.';
+        return;
+      }
+
+      fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
+              .then(response => response.json())
+              .then(data => {
+                const conversionRates = data.rates;
+                let resultHTML = '';
+
+                if (conversionRates.USD && conversionRates.EUR && conversionRates.KZT) {
+                  const convertedAmountUSD = (amount * conversionRates.USD).toFixed(2);
+                  const convertedAmountEUR = (amount * conversionRates.EUR).toFixed(2);
+                  const convertedAmountKZT = (amount * conversionRates.KZT).toFixed(2);
+
+                  resultHTML = `
+                        <p>${amount.toFixed(2)} ${fromCurrency} = ${convertedAmountUSD} USD</p>
+                        <p>${amount.toFixed(2)} ${fromCurrency} = ${convertedAmountEUR} EUR</p>
+                        <p>${amount.toFixed(2)} ${fromCurrency} = ${convertedAmountKZT} KZT</p>
+                    `;
+                } else {
+                  resultHTML = 'Exchange rates not available for all required currencies.';
+                }
+
+                resultDiv.innerHTML = resultHTML;
+              })
+              .catch(error => {
+                console.error(error);
+                resultDiv.textContent = 'An error occurred while fetching exchange rates.';
+              });
+    });
+  });
+
+</script>
+</body>
+</html>
